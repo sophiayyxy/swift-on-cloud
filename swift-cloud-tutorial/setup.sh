@@ -22,7 +22,8 @@ then
 else # Running on local machine
     for p in 04 05 06
     do
-        cp ../compute-engine/swift.properties part${p}/swift.properties
+	echo "hi"
+        #cp ../compute-engine/swift.properties part${p}/swift.properties
     done
 fi
 
