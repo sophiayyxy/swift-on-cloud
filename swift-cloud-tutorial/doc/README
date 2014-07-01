@@ -1,5 +1,5 @@
-Swift Tutorial for running everywhere
-=====================================
+Swift Tutorial
+==============
 
 This tutorial is viewable at:
 http://swift-lang.org/tutorials/localhost/tutorial.html [red]#<not applicable>#
@@ -577,7 +577,7 @@ file stats_log<"output/average.log">;
 Note that the workflow is based on data flow dependencies: each simulation 
 depends on the single seed value, calculated in this statement:
 -----
-seedfile = genseed(1);
+seedfile = genseed(1, simulate_script);
 -----
 The bias file is computed and then consumed in these two dependent statements:
 -----
@@ -694,14 +694,101 @@ bias values as is needed for each simulation.  As a further exercise,
 modify the script to generate a unique seed value for each simulation,
 which is a common practice in ensemble computations.
 
-If you want to run `p4.swift` on compute nodes instead of the headnode, you can also specify it on the 
-command line. For example, if you are on Midway, you can do:
+Running jobs on remote sites
+----------------------------
+
+If you want to run `p4.swift` on compute nodes instead of on the headnode, you can also specify it on the 
+command line. For example, if you are on Midway, you can run:
 -----
 $ swift p4.swift -site=midway-compute
 -----
 
+All of these names are defined in the Swift's `swift.properties` configuration file. The 
+file allows many parameters to specify how jobs should be run on a given resource.
 
+Consider, for example, that Midway has several Slurm partitions. The sandyb partition has 16 
+cores, and the westmere partition has 12 cores. Depending on the application and which partitions 
+are busy, you may want to modify where you run in the `jobQueue` specification:
+-----
+site.midway-compute {
+   jobManager=slurm
+   jobQueue=westmere
+   tasksPerWorker=4
+   initialScore=10000
+   filesystem=local
+   jobproject=pi-wilde
+   workdir=/scratch/midway/sophiayang/work
+}
+-----
+By setting the tasksPerWorker to the desired number of parallel application 
+invocations it is possible to take advantage of multiple cores in the processor. 
+The taskThrottle variable is used to limit number of tasks sent to workers 
+for execution. Both tasksPerWorker and taskThrottle are set to 2 in the tutorial 
+and could be set to the number of cores available on your machine.
+You should make sure to modify `workdir` to your own directory on the machine.
 
+You can also execute the jobs remotely from your own machine by setting `jobManager` to the 
+full path of the scheduler.
+
+If you run:
+-----
+$ swift p4.swift -site=midway-remote
+-----
+Swift will `ssh` to the target site and start the jobs there.
+
+The `swift.properties` configuration file will therefore look like this:
+-----
+site.midway-remote {
+   jobManager=midway.rcc.uchicago.edu:slurm
+   jobQueue=westmere
+   tasksPerWorker=12
+   initialScore=10000
+   filesystem=local
+   jobproject=pi-wilde
+   workdir=/scratch/midway/sophiayang/work
+}
+-----
+
+With the right specifications, you can define your own site using similar 
+property settings. Swift will then be able to run anywhere you want.
+
+[NOTE]
+=====
+Make sure you have passwordless access to the site if you are running from your 
+own machine to avoid having to enter the password repeatedly. This can be done 
+by setting your public key on the remote site.
+=====
+
+.Running on mulitple sites
+If you want your jobs to run on different sites, you can define where *each* of the 
+`app`s you used inside your functions comes from. For example:
+-----
+app.midway.bash=/bin/bash
+-----
+In this case, it indicates that the app `bash` is located in `/bin/bash` and Swift 
+will look for such a file on all sites to execute the command.
+
+For another example, if you define:
+-----
+app.local.simulate=$PWD/simulate.sh
+-----
+Here it indicates that the app `simulate` (the first token in the command line declaration of the function 
+`simulation` in previous examples) is located in the file `simulate.sh` and since the path `simulate.sh` is 
+specified with no directory components, Swift expectsthat `simulate.sh` executable will be available in 
+you `PATH`.
+
+.Specifying sites in configuration file
+
+If you are used to running jobs on a fix combination of site and got tired of 
+typing the names on the command line, you can also specify them in the 
+`swift.properties` file by doing `site=XX, XX, ...`. For example:
+-----
+site=cloud,local
+-----
+Then you can just run `swift p4.swift` and it will be executed in the according 
+sites.
+
+More explanations on setting the configuration file will be in the User Guide.
 
 ////
 It defines
@@ -734,8 +821,6 @@ in each `partNN` directory in the tutorial folder. These specify the
 environment-specific details of where to find application (file `apps`) 
 and where to run them (file `sites.xml`). These files will be explained 
 in more detail in the second part, and can be ignored for now.
-
-The swift.properties file also defines properties that control the parallelism involved in the swift execution. By setting the tasksPerWorker to the desired number of parallel application invocations it is possible to take advantage of multiple cores in the processor. The taskThrottle variable is used to limit number of tasks sent to workers for execution. Both tasksPerWorker and taskThrottle are set to 2 in the tutorial and could be set to the number of cores available on your machine.
 
 In part 2, we update the `swift.properties` file. Instead of using 
 shell script `simulate.sh`, we use the equivalent python version 
