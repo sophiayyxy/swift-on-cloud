@@ -2,7 +2,7 @@ Swift Tutorial
 ==============
 
 This tutorial is viewable at:
-http://swift-lang.org/tutorials/localhost/tutorial.html [red]#<not applicable>#
+http://swift-lang.org/tutorials/localhost/tutorial.html [red]#<fix>#
 
 
 Introduction: Why Parallel Scripting?
@@ -26,9 +26,14 @@ clusters, clouds, grids, and supercomputers.
 This tutorial contains *two parts*. In the first part you will be able to try a few
 Swift examples on your local machine, to get a sense of the language. Then in the 
 second part you will run similar workflows on remote resources such as Midway, 
-distributed OSG Connect resources, Cray, etc., both locally on those machines and 
-on your own machine by connecting to them remotely. You will thus see how more 
+distributed OSG Connect resources, Cray, etc., and learn how to instruct Swift to run 
+jobs in different places. You will also see how more 
 complex workflows can be expressed with Swift scripts.
+
+////
+both locally on those machines and 
+on your own machine by connecting to them remotely.
+////
 
 Swift installation
 ------------------
@@ -38,23 +43,30 @@ Swift installation
 
 Tutorial scripts installation
 -----------------------------
-Run the following commands to extract these tutorial scripts. [red]#<one installation for all, fix link?>#
+Run the following commands to extract these tutorial scripts. [red]#<fix?>#
 
 -----
+wget https://github.com/yadudoc/swift-on-cloud/archive/master.zip
+unzip master.zip
+mv swift-on-cloud-master swift-on-cloud
+cd swift-on-cloud
+-----
+////
 $ cd $HOME
 $ wget http://swiftlang.org/tutorials/midway/swift-midway-tutorial.tar.gz
 $ tar xvfz swift-midway-tutorial.tar.gz
 $ cd swift-midway-tutorial
------
+////
 
 Run the tutorial setup script
 -----
 $ source setup.sh   # You must run this with "source" !
 -----
 Doing this will add the sample applications `simulate` and `stats` (explained in the next part) and 
-certain other functionalities to your local `PATH` for you to run the tutorial.
+some other functionalities to your local `PATH` for you to run the tutorial.
 
-In the tutorial directory you will find some `partNN` folders. `part01` to `part03` folders contain 
+In the tutorial directory you will find six `partNN` folders. Each part contains one Swift example for the 
+workflow tutorial. `part01` to `part03` contain 
 Swift scripts for running jobs locally. `part04` to `part06` contain scripts for running jobs on remote 
 resources that you have access to, with corresponding configurations. Further explanations on these will 
 be in Part Two of this tutorial.
@@ -65,15 +77,15 @@ If you later want to get the most recent version of this tutorial from
 the Swift Subversion repository, do:
 
 -----
-$ svn co https://svn.ci.uchicago.edu/svn/vdl2/SwiftTutorials/swift-localhost-tutorial  <TODO: Fix link>
+$ svn co https://svn.ci.uchicago.edu/svn/vdl2/SwiftTutorials/swift-localhost-tutorial  <fix>
 -----
 
 This will create a directory called "swift-localhost-tutorial" which contains all of the files 
-used in this tutorial.
+used in this tutorial. [red]#<fix name>#
 
 .Verify your environment
 
-To verify that Swift has successfully loaded, do:
+To verify that Swift has successfully loaded, run:
 -----
 $ swift -version # verify that you have Swift 0.95 RC6
 -----
@@ -286,8 +298,8 @@ $ cat sim.out
 -----
 
 To cleanup the directory and remove all outputs (including the log
-files and directories that Swift generates), run the cleanup script
-which is located in the tutorial `PATH`:
+files and directories that Swift generates), run the `cleanup` script
+which is located in the tutorial `$PATH`:
 
 -----
 $ cleanup
@@ -492,13 +504,13 @@ $ swift p1.swift -site=local
 Then Swift will complete the jobs for you on the login node.
 
 You can use `part01-03` to run the same workflows as in Part One on the local 
-node as an exercise. You will learn more examples for running on remote sites later using 
-`part04-06`, which show how to tell Swift to run jobs on other sites in the following section.
+node as an exercise. You will learn more examples for running on remote sites using 
+`part04-06` introduced in the following section.
 
 [NOTE]
 =====
-You have to have Swift installed on the local machine to run jobs! See Swift Installation for 
-instructions. However, you do not need to do the same for the remote sites as Swift will be 
+You have to have Swift installed on the headnode to run jobs! See Swift Installation for 
+instructions. However, you do not need to do the same for the remote sites as Swift service will be 
 automatically carried over.
 =====
 
@@ -506,7 +518,7 @@ Example 4: Running a parallel ensemble on compute nodes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 `p4.swift` will run our mock "simulation" applications on compute nodes. The script is almost the same 
-as `p3.swift`, but specifies that each simulation app invocation should additionally return 
+as `p3.swift`, but specifies that each `simulation` app invocation should additionally return 
 the log file which the application writes to `stderr`.
 
 .p4.swift
@@ -581,8 +593,8 @@ ANT_HOME_modshare=/software/ant-1.8.4-all:3
 -----
 ////
 
-Note that in the script we use `bash simulate.sh` and `bash stats.sh` instead of just `simulate` and 
-`stats`. This is because `simulate` and `stats` are no longer added to the `PATH` on the remote site 
+Note that in the script we use `bash` to invoke `simulate.sh` and `stats.sh` instead of just using `simulate` and 
+`stats`. This is because `simulate` and `stats` are no longer added to the `$PATH` on the remote site 
 and we have to manually give the command to execute the bash script.
 
 In order to run `p4.swift` on compute nodes instead of on the headnode, you can again specify it on the command 
@@ -644,7 +656,7 @@ More explanations on setting the configuration file will be found in the User Gu
 
 [NOTE]
 =====
-If you are running from your own machine, make sure you have passphraseless accesses to all sites 
+Make sure you have passphraseless accesses to all sites 
 to ensure a smooth workflow. This can be done by identifying yourself with 
 your public key on all remote sites.
 =====
@@ -690,24 +702,25 @@ file stats_log<"output/average.log">;
 -----
 
 This modification can be used to control where you run your applications. Right now Swift will 
-execute each of the `apps` on all sites where it is able to be located in `$PATH`. Therefore, 
-in order to give instructions on where to run each application, you must define *each* of the `app` 
-you used inside your application declaration in `swift.properties`. For example:
+execute each of the `apps` on every site where it is able to be located in `$PATH`. Therefore, 
+in order to give instructions on where to run each application, you need to define *each* of the `apps` 
+you used inside your application declarations in `swift.properties`. For example in this case:
 
-.Definition for app simulation
+.Definition for app `simulation`
 -----
 app.midway.bash=/bin/bash
 -----
 It indicates that the app `bash` is located in `/bin/bash` and Swift 
-will look for such a file on a site named `midway` to execute the `bash` commands.
+will look for such a file on a site named `midway` to run the `simulation` application.
 
-.Definition for app analyze
+.Definition for app `analyze`
 -----
 app.local.analyze=/bin/sh
 -----
-Similarly in this case, Swift will look for `/bin/sh` locally to execute the `analyze` application.
+Similarly, Swift will look for `/bin/sh` locally to execute the `analyze` application.
 
-For another example, for `p1.swift`:
+
+For another example, let us take another look at `p1.swift`:
 -----
 type file;
 
@@ -720,7 +733,7 @@ file f <"sim.out">;
 f = simulation();
 -----
 
-If you define `app simulate` like this:
+If you define app `simulate` like this:
 -----
 app.local.simulate=$PWD/simulate.sh
 -----
@@ -739,9 +752,9 @@ You can just say this in `swift.properties`:
 -----
 site=midway-remote,local
 -----
-Then after you have defined *all* your `apps` in the configuration file as well,
-when you run `swift p5.swift` Swift will execute each of the `app` on the 
-corresponding site you specified.
+Then if you have defined *all* your `apps` in the configuration file correctly,
+when you run `swift p5.swift` Swift will execute each of the `apps` on the 
+corresponding site that you specified.
 
 Example 6: Specifying more complex workflow patterns
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -751,7 +764,7 @@ stages to the workflow. Here, we generate a dynamic seed value that
 will be used by all of the simulations to initialize the random number 
 generator, so that there are some dependencies to the numbers being generated. 
 For each simulation, we also run a pre-processing application to generate a unique "bias
-file" (Remeber that `(R*scale)+bias`). This pattern is shown below, followed by the Swift script.
+file" (Remeber the form `(R*scale)+bias`). This pattern is shown below, followed by the Swift script.
 
 image::part06.png[align="center"]
 
@@ -763,8 +776,6 @@ type file;
 file simulate_script <"simulate.sh">;
 file stats_script <"stats.sh">;
 file seedfile <"output/seed.dat">;        # Dynamically generated bias for simulation ensemble
-
-# app() functions for application programs to be called:
 
 app (file out) genseed (int nseeds, file seed_script)
 {
@@ -934,72 +945,43 @@ bias values as is needed for each simulation.  As a further exercise,
 modify the script to generate a unique seed value for each simulation,
 which is a common practice in ensemble computations.
 
-.Running on mulitple sites
-If you want your jobs to run on different sites, you can define in `swift.properties` where *each* of the 
-`apps` you used inside your function declarations comes from. For example:
+Performing larger Swift runs and Plotting run activities
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To test with larger runs, you can change the command line arguments. The 
+example below will run 1000 simulations with each simulation taking 5 seconds:
 -----
-app.midway.bash=/bin/bash
------
-
-For another example, for `p1.swift`:
------
-type file;
-
-app (file o) simulation ()
-{
-  *simulate* stdout=filename(o);
-}
-
-file f <"sim.out">;
-f = simulation();
------
-If you define `app simulate` like this:
------
-app.local.simulate=$PWD/simulate.sh
------
-It indicates that the app `simulate` (the first token in the command line declaration of the function 
-`simulation` in previous examples) is located in the file `simulate.sh` and since the path `simulate.sh` is 
-specified with no directory components, Swift expects that `simulate.sh` executable will be available in 
-your `$PATH`.
-
-.Specifying sites in configuration file
-
-If you are used to running jobs on a fixed combination of sites and got tired of 
-typing the names on the command line, you can also specify them in the 
-`swift.properties` file by doing `site=XX, XX, ...` For example:
------
-site=cloud,local
------
-If you have defined *all* your `apps` in the configuration file, Swift will execute 
-each of the `app` on the corresponding site you specified. Otherwise, it will run the jobs 
-on all sites where a certain `app` can be located.
-
-
-
-////
-It defines
-things like the work directory, the scheduler to use, and how to
-control parallelism. The sites.xml file below will tell Swift to run
-on the local machine only, and run just 1 task at a time.
-
-.swift.properties
------
-sys::[cat ../part01/swift.properties]
+$ swift p6.swift -steps=5 -nsim=1000
 -----
 
- In this case, it
-indicates that the app "simulate" (the first token in the command line
-declaration of the function `simulation`, at line NNN) is located in the file
-simulate.sh and (since the path `simulate.sh` is specified with no
-directory components) Swift expects that the `simulate.sh` executable
-will be available in your $PATH.
+The tutorial `bin` directory in your `$PATH` provides a script
+`plot.sh` to plot the progress of a Swift script.  It generates two
+image files: `activeplot.png`, which shows the number of active jobs
+over time, and `cumulativeplot.png`, which shows the total number of
+app calls completed as the Swift script progresses.
 
-.apps
+After each Swift run, a new run directory is created called `runNNN`.
+Each run directory will have a log file with a similar name called
+`runNNN.log`. Once you have identified the log file name, run the 
+command `plot.sh <logfile>` to generate the plots for that
+specific run. For example:
+
 -----
-sys::[cat ../part01/swift.properties]
+$ ls
+output  p3.swift  run000  swift.properties
+
+$ cd run000/
+
+$ ls
+apps  cf  p3-20131202-2004-0kh4ha6e.d  run000.log  sites.xml
+
+$ plot.sh run000.log 
 -----
 
-////
+This can thus yield plots like the following:
+
+image::activeplot.png[width=700,align=center]
+image::cumulativeplot.png[width=700,align=center]
+
 
 ////
 You will also find a Swift configuration file `swift.properties` 
