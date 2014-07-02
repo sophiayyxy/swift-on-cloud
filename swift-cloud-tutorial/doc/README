@@ -63,10 +63,10 @@ Run the tutorial setup script
 $ source setup.sh   # You must run this with "source" !
 -----
 Doing this will add the sample applications `simulate` and `stats` (explained in the next part) and 
-some other functionalities to your local `PATH` for you to run the tutorial.
+some other functionalities to your local `$PATH` for you to run the tutorial.
 
-In the tutorial directory you will find six `partNN` folders. Each part contains one Swift example for the 
-workflow tutorial. `part01` to `part03` contain 
+In the tutorial directory you will find six `partNN` folders. Each part contains one Swift example that serves to 
+demonstrate different functions for the workflow tutorial. `part01` to `part03` contain 
 Swift scripts for running jobs locally. `part04` to `part06` contain scripts for running jobs on remote 
 resources that you have access to, with corresponding configurations. Further explanations on these will 
 be in Part Two of this tutorial.
