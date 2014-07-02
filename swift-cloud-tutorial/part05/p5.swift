@@ -2,7 +2,7 @@ type file;
 
 app (file out, file log) simulation (int sim_steps, int sim_range, int sim_values, file sim_script)
 {
-  sh "simulate.sh" "--timesteps" sim_steps "--range" sim_range "--nvalues" sim_values stdout=@out stderr=@log;
+  bash "simulate.sh" "--timesteps" sim_steps "--range" sim_range "--nvalues" sim_values stdout=@out stderr=@log;
 }
 
 app (file out, file log) analyze (file s[], file stat_script)

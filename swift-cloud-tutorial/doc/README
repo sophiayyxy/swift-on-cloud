@@ -187,14 +187,15 @@ $ stats.sh f* 2>log
 -----
 
 
-[big]#*Tutorial Part One*#
---------------------------
+*Tutorial Part One*
+-------------------
 This tutorial is only for running on localhost. See Part Two for tutorial on running jobs on 
 remote resources.
 
-
+/////
 Basic of the Swift language with local execution
 ------------------------------------------------
+/////
 
 A Summary of Swift in a nutshell
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -470,12 +471,12 @@ Progress: Tue, 03 Jun 2014 17:08:19-0500  Active:11  Finished successfully:89
 Final status:Tue, 03 Jun 2014 17:08:19-0500  Finished successfully:101
 -----
 
-Now that we've seen how to use Swift to complete jobs for you 
+Now that we've seen how to use Swift to complete simple jobs for you 
 on your local machine, we can now proceed to learning how to run 
-similar jobs on remote machines.
+similar workflows on remote machines.
 
-[big]#*Tutorial Part Two*#
---------------------------
+*Tutorial Part Two*
+-------------------
 
 When you have access to other resources that you wish to run jobs on, 
 you can simply state `-site=XX` (where `XX` is the name of the resource) on the command line 
@@ -491,8 +492,8 @@ $ swift p1.swift -site=local
 Then Swift will complete the jobs for you on the login node.
 
 You can use `part01-03` to run the same workflows as in Part One on the local 
-node as an exercise. We will show more examples for running on remote sites later using 
-`part04-06`, which introduce how to run more complex jobs as follows.
+node as an exercise. You will learn more examples for running on remote sites later using 
+`part04-06`, which show how to tell Swift to run jobs on other sites in the following section.
 
 [NOTE]
 =====
@@ -501,10 +502,251 @@ instructions. However, you do not need to do the same for the remote sites as Sw
 automatically carried over.
 =====
 
-Example 4: Specifying more complex workflow patterns
+Example 4: Running a parallel ensemble on compute nodes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`p4.swift` will run our mock "simulation" applications on compute nodes. The script is almost the same 
+as `p3.swift`, but specifies that each simulation app invocation should additionally return 
+the log file which the application writes to `stderr`.
+
+.p4.swift
+-----
+type file;
+
+app (file out, file log) simulation (int sim_steps, int sim_range, int sim_values, file sim_script)
+{
+  bash "simulate.sh" "--timesteps" sim_steps "--range" sim_range "--nvalues" sim_values stdout=filename(out) stderr=filename(log);
+}
+
+app (file out, file log) analyze (file s[], file stat_script)
+{
+  bash "stats.sh" filenames(s) stdout=filename(out) stderr=filename(log);
+}
+
+int nsim   = toInt(arg("nsim",   "10"));
+int steps  = toInt(arg("steps",  "1"));
+int range  = toInt(arg("range",  "100"));
+int values = toInt(arg("values", "5"));
+
+file simulate_script <"simulate.sh">;
+file stats_script <"stats.sh">;
+
+file sims[];
+
+foreach i in [0:nsim-1] {
+  file simout <single_file_mapper; file=strcat("output/sim_",i,".out")>;
+  file simlog <single_file_mapper; file=strcat("output/sim_",i,".log")>;
+  (simout,simlog) = simulation(steps,range,values,simulate_script);
+  sims[i] = simout;
+}
+
+file stats_out<"output/average.out">;
+file stats_log<"output/average.log">;
+(stats_out, stats_log) = analyze(sims, stats_script);
+-----
+
+Now when you run `swift p4.swift` you will see that two types of output files will be placed in 
+the `output/` directory: `sim_N.out` and `sim_N.log`. The log files provide data on the runtime 
+environment of each app invocation. 
+////
+For example:
+-----
+$ cat output/sim_0.log
+Called as: /home/davidkelly999/swift-midway-tutorial/app/simulate: --timesteps 1 --range 100 --nvalues 5
+
+Start time: Mon Dec  2 12:17:06 CST 2013
+Running as user: uid=88848(davidkelly999) gid=88848(davidkelly999) groups=88848(davidkelly999),10008(rcc),10030(pi-gavoth),10031(sp-swift),10036(swift),10058(pi-joshuaelliott),10084(pi-wilde),10118(cron-account),10124(cmts),10138(cmtsworkshop)
+Running on node: midway002
+Node IP address: 10.50.181.2 172.25.181.2
+
+Simulation parameters:
+
+bias=0
+biasfile=none
+initseed=none
+log=yes
+paramfile=none
+range=100
+scale=1
+seedfile=none
+timesteps=1
+output width=8
+
+Environment:
+
+ANTLR_ROOT=/software/antlr-2.7-el6-x86_64
+ANT_HOME=/software/ant-1.8.4-all
+ANT_HOME_modshare=/software/ant-1.8.4-all:3
+...
+-----
+////
+
+Note that in the script we use `bash simulate.sh` and `bash stats.sh` instead of just `simulate` and 
+`stats`. This is because `simulate` and `stats` are no longer added to the `PATH` on the remote site 
+and we have to manually give the command to execute the bash script.
+
+In order to run `p4.swift` on compute nodes instead of on the headnode, you can again specify it on the command 
+line. For example, if you are on Midway, you can run:
+-----
+$ swift p4.swift -site=midway-compute
+-----
+
+The site names can be defined in the Swift's `swift.properties` configuration file. The 
+file allows many parameters to specify how jobs should be run on a given site.
+
+Consider, for example, that Midway has several Slurm partitions. The sandyb partition has 16 
+cores, and the westmere partition has 12 cores. Depending on the application and which partitions 
+are busy, you may want to modify where you run in the `jobQueue` specification:
+-----
+site.midway-compute {
+   jobManager=slurm
+   jobQueue=westmere
+   tasksPerWorker=4
+   initialScore=10000
+   filesystem=local
+   jobproject=pi-wilde
+   workdir=/scratch/midway/sophiayang/work
+}
+-----
+By setting the `tasksPerWorker` to the desired number of parallel application 
+invocations it is possible to take advantage of multiple cores in the processor. 
+The `taskThrottle` variable is used to limit number of tasks sent to workers 
+for execution. Both `tasksPerWorker` and `taskThrottle` are set to 2 in the tutorial 
+and could be set to the number of cores available on your machine.
+You should also make sure to change `workdir` to your own directory on the site.
+
+You can also execute jobs remotely from your own machine by setting `jobManager` to the 
+full path of the scheduler.
+
+For example, if you run:
+-----
+$ swift p4.swift -site=midway-remote
+-----
+Swift will `ssh` to the target site and start the jobs there.
+
+`swift.properties` will therefore look like this:
+-----
+site.midway-remote {
+   jobManager=midway.rcc.uchicago.edu:slurm
+   jobQueue=westmere
+   tasksPerWorker=12
+   initialScore=10000
+   filesystem=local
+   jobproject=pi-wilde
+   workdir=/scratch/midway/sophiayang/work
+}
+-----
+
+With the right specifications, you can define your own site using similar 
+property settings. Swift will then be able to run anywhere you want.
+
+More explanations on setting the configuration file will be found in the User Guide.
+
+[NOTE]
+=====
+If you are running from your own machine, make sure you have passphraseless accesses to all sites 
+to ensure a smooth workflow. This can be done by identifying yourself with 
+your public key on all remote sites.
+=====
+
+Example 5: Controlling the compute-node pools where applications run
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+`p5.swift` is exactly the same as `p4.swift` with one exception: `stats.sh` is executed 
+using `sh` instead of `bash` in the `analyze` application.
+
+.p5.swift
+-----
+type file;
+
+app (file out, file log) simulation (int sim_steps, int sim_range, int sim_values, file sim_script)
+{
+  bash "simulate.sh" "--timesteps" sim_steps "--range" sim_range "--nvalues" sim_values stdout=@out stderr=@log;
+}
+
+app (file out, file log) analyze (file s[], file stat_script)
+{
+  sh "stats.sh" filenames(s) stdout=filename(out) stderr=filename(log);
+}
+
+int nsim   = toInt(arg("nsim",   "10"));
+int steps  = toInt(arg("steps",  "1"));
+int range  = toInt(arg("range",  "100"));
+int values = toInt(arg("values", "5"));
+
+file sims[];
+file simulate_script <"simulate.sh">;
+file stats_script <"stats.sh">;
+
+foreach i in [0:nsim-1] {
+  file simout <single_file_mapper; file=strcat("output/sim_",i,".out")>;
+  file simlog <single_file_mapper; file=strcat("output/sim_",i,".log")>;
+  (simout,simlog) = simulation(steps,range,values,simulate_script);
+  sims[i] = simout;
+}
+
+file stats_out<"output/average.out">;
+file stats_log<"output/average.log">;
+(stats_out, stats_log) = analyze(sims,stats_script);
+-----
+
+This modification can be used to control where you run your applications. Right now Swift will 
+execute each of the `apps` on all sites where it is able to be located in `$PATH`. Therefore, 
+in order to give instructions on where to run each application, you must define *each* of the `app` 
+you used inside your application declaration in `swift.properties`. For example:
+
+.Definition for app simulation
+-----
+app.midway.bash=/bin/bash
+-----
+It indicates that the app `bash` is located in `/bin/bash` and Swift 
+will look for such a file on a site named `midway` to execute the `bash` commands.
+
+.Definition for app analyze
+-----
+app.local.analyze=/bin/sh
+-----
+Similarly in this case, Swift will look for `/bin/sh` locally to execute the `analyze` application.
+
+For another example, for `p1.swift`:
+-----
+type file;
+
+app (file o) simulation ()
+{
+  simulate stdout=filename(o);
+}
+
+file f <"sim.out">;
+f = simulation();
+-----
+
+If you define `app simulate` like this:
+-----
+app.local.simulate=$PWD/simulate.sh
+-----
+It indicates that the app `simulate` is located in the file `simulate.sh` and since 
+the path `simulate.sh` is specified with no directory components, Swift expects that 
+`simulate.sh` executable will be available in your `$PATH`.
+
+.Specifying sites in configuration file
+If you are used to running jobs on a fixed combination of sites and don't want to type 
+out the names every single time, you can also specify them in `swift.properties` 
+by doing `site=XX, XX, ...` For example, instead of running:
+-----
+$ swift p5.swift -site=midway-remote,local
+-----
+You can just put this in `swift.properties':
+-----
+site=midway-remote,local
+-----
+Then after you have defined *all* your `apps` in the configuration file as well,
+when you run `swift p5.swift` Swift will execute each of the `app` on the 
+corresponding site you specified.
+
+Example 6: Specifying more complex workflow patterns
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`p4.swift` expands the workflow pattern of `p3.swift` to add additional
+`p6.swift` expands the workflow pattern of `p5.swift` to add additional
 stages to the workflow. Here, we generate a dynamic seed value that
 will be used by all of the simulations to initialize the random number 
 generator, so that there are some dependencies to the numbers being generated. 
@@ -513,7 +755,7 @@ file" (Remeber that `(R*scale)+bias`). This pattern is shown below, followed by 
 
 image::part06.png[align="center"]
 
-.p4.swift
+.p6.swift
 ----
 type file;
 
@@ -541,8 +783,6 @@ app (file out, file log) simulation (int timesteps, int sim_range,
   bash "simulate.sh" "-t" timesteps "-r" sim_range "-B" filename(bias_file) "-x" scale
            "-n" sim_count "-S" filename(seed_file) stdout=filename(out) stderr=filename(log);
 }
-# Note that we use "bash simulate.sh" here instead of "simulate". This is because "simulate" is no 
-longer added to the PATH of the remote site and we have to manually execute the bash script.
 
 app (file out, file log) analyze (file s[], file stat_script)
 {
@@ -587,14 +827,14 @@ The bias file is computed and then consumed in these two dependent statements:
 
 To run:
 ----
-$ cd ../part04
-$ swift p4.swift
+$ cd ../part06
+$ swift p6.swift
 ----
 
 The default parameters result in the following execution log:
 
 -----
-$ swift p4.swift 
+$ swift p6.swift 
 Swift 0.95 Branch SVN swift-r7903 cog-r3908
 RunID: run001
 Progress: Thu, 05 Jun 2014 06:01:36-0500
@@ -694,101 +934,47 @@ bias values as is needed for each simulation.  As a further exercise,
 modify the script to generate a unique seed value for each simulation,
 which is a common practice in ensemble computations.
 
-Running jobs on remote sites
-----------------------------
-
-If you want to run `p4.swift` on compute nodes instead of on the headnode, you can also specify it on the 
-command line. For example, if you are on Midway, you can run:
------
-$ swift p4.swift -site=midway-compute
------
-
-All of these names are defined in the Swift's `swift.properties` configuration file. The 
-file allows many parameters to specify how jobs should be run on a given resource.
-
-Consider, for example, that Midway has several Slurm partitions. The sandyb partition has 16 
-cores, and the westmere partition has 12 cores. Depending on the application and which partitions 
-are busy, you may want to modify where you run in the `jobQueue` specification:
------
-site.midway-compute {
-   jobManager=slurm
-   jobQueue=westmere
-   tasksPerWorker=4
-   initialScore=10000
-   filesystem=local
-   jobproject=pi-wilde
-   workdir=/scratch/midway/sophiayang/work
-}
------
-By setting the tasksPerWorker to the desired number of parallel application 
-invocations it is possible to take advantage of multiple cores in the processor. 
-The taskThrottle variable is used to limit number of tasks sent to workers 
-for execution. Both tasksPerWorker and taskThrottle are set to 2 in the tutorial 
-and could be set to the number of cores available on your machine.
-You should make sure to modify `workdir` to your own directory on the machine.
-
-You can also execute the jobs remotely from your own machine by setting `jobManager` to the 
-full path of the scheduler.
-
-If you run:
------
-$ swift p4.swift -site=midway-remote
------
-Swift will `ssh` to the target site and start the jobs there.
-
-The `swift.properties` configuration file will therefore look like this:
------
-site.midway-remote {
-   jobManager=midway.rcc.uchicago.edu:slurm
-   jobQueue=westmere
-   tasksPerWorker=12
-   initialScore=10000
-   filesystem=local
-   jobproject=pi-wilde
-   workdir=/scratch/midway/sophiayang/work
-}
------
-
-With the right specifications, you can define your own site using similar 
-property settings. Swift will then be able to run anywhere you want.
-
-[NOTE]
-=====
-Make sure you have passwordless access to the site if you are running from your 
-own machine to avoid having to enter the password repeatedly. This can be done 
-by setting your public key on the remote site.
-=====
-
 .Running on mulitple sites
-If you want your jobs to run on different sites, you can define where *each* of the 
-`app`s you used inside your functions comes from. For example:
+If you want your jobs to run on different sites, you can define in `swift.properties` where *each* of the 
+`apps` you used inside your function declarations comes from. For example:
 -----
 app.midway.bash=/bin/bash
 -----
-In this case, it indicates that the app `bash` is located in `/bin/bash` and Swift 
-will look for such a file on all sites to execute the command.
 
-For another example, if you define:
+For another example, for `p1.swift`:
+-----
+type file;
+
+app (file o) simulation ()
+{
+  *simulate* stdout=filename(o);
+}
+
+file f <"sim.out">;
+f = simulation();
+-----
+If you define `app simulate` like this:
 -----
 app.local.simulate=$PWD/simulate.sh
 -----
-Here it indicates that the app `simulate` (the first token in the command line declaration of the function 
+It indicates that the app `simulate` (the first token in the command line declaration of the function 
 `simulation` in previous examples) is located in the file `simulate.sh` and since the path `simulate.sh` is 
-specified with no directory components, Swift expectsthat `simulate.sh` executable will be available in 
-you `PATH`.
+specified with no directory components, Swift expects that `simulate.sh` executable will be available in 
+your `$PATH`.
 
 .Specifying sites in configuration file
 
-If you are used to running jobs on a fix combination of site and got tired of 
+If you are used to running jobs on a fixed combination of sites and got tired of 
 typing the names on the command line, you can also specify them in the 
-`swift.properties` file by doing `site=XX, XX, ...`. For example:
+`swift.properties` file by doing `site=XX, XX, ...` For example:
 -----
 site=cloud,local
 -----
-Then you can just run `swift p4.swift` and it will be executed in the according 
-sites.
+If you have defined *all* your `apps` in the configuration file, Swift will execute 
+each of the `app` on the corresponding site you specified. Otherwise, it will run the jobs 
+on all sites where a certain `app` can be located.
 
-More explanations on setting the configuration file will be in the User Guide.
+
 
 ////
 It defines
