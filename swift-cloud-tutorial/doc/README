@@ -46,7 +46,7 @@ Tutorial scripts installation
 Run the following commands to extract these tutorial scripts. [red]#<fix?>#
 
 -----
-wget https://github.com/yadudoc/swift-on-cloud/archive/master.zip
+wget https://github.com/tauzi/swift-on-cloud/archive/master.zip
 unzip master.zip
 mv swift-on-cloud-master swift-on-cloud
 cd swift-on-cloud/swift-cloud-tutorial
