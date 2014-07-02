@@ -735,7 +735,7 @@ by doing `site=XX, XX, ...` For example, instead of running:
 -----
 $ swift p5.swift -site=midway-remote,local
 -----
-You can just put this in `swift.properties':
+You can just say this in `swift.properties`:
 -----
 site=midway-remote,local
 -----
