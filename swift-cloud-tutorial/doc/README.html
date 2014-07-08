@@ -764,9 +764,9 @@ concurrently as soon as their inputs are available, reducing the need
 for complex parallel programming.  Swift expresses your workflow in a
 portable fashion: The same script runs on multicore computers,
 clusters, clouds, grids, and supercomputers.</p></div>
-<div class="paragraph"><p>This tutorial contains <strong>two parts</strong>. In the first part you will be able to try a few
+<div class="paragraph"><p>This tutorial contains <strong>two sections</strong>. In the first section you will be able to try a few
 Swift examples on your local machine, to get a sense of the language. Then in the
-second part you will run similar workflows on remote resources such as Midway,
+second section you will run similar workflows on remote resources such as Midway,
 distributed OSG Connect resources, Cray, etc., and learn how to instruct Swift to run
 jobs in different places. You will also see how more
 complex workflows can be expressed with Swift scripts.</p></div>
@@ -775,23 +775,12 @@ complex workflows can be expressed with Swift scripts.</p></div>
 <div class="sect1">
 <h2 id="_swift_installation">Swift installation</h2>
 <div class="sectionbody">
-<div class="olist arabic"><ol class="arabic">
-<li>
-<p>
-Download the file by running "wget <a href="http://swiftlang.org/packages/swift-0.95-RC6.tar.gz">http://swiftlang.org/packages/swift-0.95-RC6.tar.gz</a>"
-</p>
-</li>
-<li>
-<p>
-Extract by running "tar xfz swift-0.95-RC6.tar.gz"
-</p>
-</li>
-<li>
-<p>
-Add to PATH by running "export PATH=/path/to/swift-0.95-RC6/bin:$PATH"
-</p>
-</li>
-</ol></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ wget http://swiftlang.org/packages/swift-0.95-RC6.tar.gz  # Download the file
+$ tar xfz swift-0.95-RC6.tar.gz   # Extract the file
+$ export PATH=/path/to/swift-0.95-RC6/bin:$PATH   # Add to PATH</code></pre>
+</div></div>
 </div>
 </div>
 <div class="sect1">
@@ -800,7 +789,7 @@ Add to PATH by running "export PATH=/path/to/swift-0.95-RC6/bin:$PATH"
 <div class="paragraph"><p>Run the following commands to extract these tutorial scripts. <span class="red">&lt;fix?&gt;</span></p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>wget https://github.com/tauzi/swift-on-cloud/archive/master.zip
+<pre><code>wget https://github.com/yadudoc/swift-on-cloud/archive/master.zip
 unzip master.zip
 mv swift-on-cloud-master swift-on-cloud
 cd swift-on-cloud/swift-cloud-tutorial</code></pre>
@@ -816,7 +805,7 @@ some other functionalities to your local <code>$PATH</code> for you to run the t
 demonstrate different functions for the workflow tutorial. <code>part01</code> to <code>part03</code> contain
 Swift scripts for running jobs locally. <code>part04</code> to <code>part06</code> contain scripts for running jobs on remote
 resources that you have access to, with corresponding configurations. Further explanations on these will
-be in Part Two of this tutorial.</p></div>
+be in Section Two of this tutorial.</p></div>
 <div class="paragraph"><div class="title">To check out the tutorial scripts from SVN</div><p>If you later want to get the most recent version of this tutorial from
 the Swift Subversion repository, do:</p></div>
 <div class="listingblock">
@@ -830,6 +819,17 @@ used in this tutorial. <span class="red">&lt;fix name&gt;</span></p></div>
 <div class="content">
 <pre><code>$ swift -version # verify that you have Swift 0.95 RC6</code></pre>
 </div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<img src="./images/icons/note.png" alt="Note" />
+</td>
+<td class="content">
+<div class="paragraph"><p>If you re-login or open new ssh sessions, you must re-run <code>source setup.sh</code> in each
+ssh shell/window.</p></div>
+</td>
+</tr></table>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -924,9 +924,9 @@ $ stats.sh f* 2&gt;log
 </div>
 </div>
 <div class="sect1">
-<h2 id="_strong_tutorial_part_one_strong"><strong>Tutorial Part One</strong></h2>
+<h2 id="_strong_tutorial_section_one_strong"><strong>Tutorial Section One</strong></h2>
 <div class="sectionbody">
-<div class="paragraph"><p>This tutorial is only for running on localhost. See Part Two for tutorial on running jobs on
+<div class="paragraph"><p>This tutorial is only for running on localhost. See Section Two for tutorial on running jobs on
 remote resources.</p></div>
 <div class="sect2">
 <h3 id="_a_summary_of_swift_in_a_nutshell">A Summary of Swift in a nutshell</h3>
@@ -1075,7 +1075,7 @@ which is located in the tutorial <code>$PATH</code>:</p></div>
 in each <code>partNN</code> directory in the tutorial folder. It defines properties
 that control the parallelism involved in the swift execution. It also defines
 properties such as the work directory and the scheduler to use. The specifics will
-be explained in more detail in the second part of the tutorial, and can be
+be explained in more detail in the second section of the tutorial, and can be
 ignored for now.</p></div>
 </td>
 </tr></table>
@@ -1203,7 +1203,7 @@ int values = toInt(arg("values","5"));</code></pre>
 <div class="paragraph"><p>Now we can specify that more runs should be performed and that each should
 run for more timesteps, and produce more that one value each, within a specified
 range, using command line arguments placed after the Swift script name in the
-form <code>-parameterName = value</code>:</p></div>
+form <code>-parameterName=value</code>:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><code>$ swift p3.swift -nsim=3 -steps=10 -values=4 -range=1000000
@@ -1286,21 +1286,21 @@ similar workflows on remote machines.</p></div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_strong_tutorial_part_two_strong"><strong>Tutorial Part Two</strong></h2>
+<h2 id="_strong_tutorial_section_two_strong"><strong>Tutorial Section Two</strong></h2>
 <div class="sectionbody">
 <div class="paragraph"><p>When you have access to other resources that you wish to run jobs on,
 you can simply state <code>-site=XX</code> (where <code>XX</code> is the name of the resource) on the command line
 following the usual command given to run Swift. With the right configuration
 specifications, Swift will automatically connect you to the target machine and
 start the jobs there.</p></div>
-<div class="paragraph"><p>For example, if you are already logged in to a certain machine and you wish to run
+<div class="paragraph"><p>For example, if you are already logged in on a certain machine and you wish to run
 jobs locally, you can do:</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><code>$ swift p1.swift -site=local</code></pre>
 </div></div>
 <div class="paragraph"><p>Then Swift will complete the jobs for you on the login node.</p></div>
-<div class="paragraph"><p>You can use <code>part01-03</code> to run the same workflows as in Part One on the local
+<div class="paragraph"><p>You can use <code>part01-03</code> to run the same workflows as in Section One on the local
 node as an exercise. You will learn more examples for running on remote sites using
 <code>part04-06</code> introduced in the following section.</p></div>
 <div class="admonitionblock">
@@ -1366,7 +1366,7 @@ and we have to manually give the command to execute the bash script.</p></div>
 line. For example, if you are on Midway, you can run:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>$ swift p4.swift -site=midway-compute</code></pre>
+<pre><code>$ swift p4.swift -site=midway</code></pre>
 </div></div>
 <div class="paragraph"><p>The site names can be defined in the Swift&#8217;s <code>swift.properties</code> configuration file. The
 file allows many parameters to specify how jobs should be run on a given site.</p></div>
@@ -1375,14 +1375,14 @@ cores, and the westmere partition has 12 cores. Depending on the application and
 are busy, you may want to modify where you run in the <code>jobQueue</code> specification:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>site.midway-compute {
+<pre><code>site.midway {
    jobManager=slurm
    jobQueue=westmere
    tasksPerWorker=4
    initialScore=10000
    filesystem=local
-   jobproject=pi-wilde
-   workdir=/scratch/midway/sophiayang/work
+   jobproject=pi-wilde    # Put your own project ID here
+   workdir=/scratch/midway/$USER/work
 }</code></pre>
 </div></div>
 <div class="paragraph"><p>By setting the <code>tasksPerWorker</code> to the desired number of parallel application
@@ -1408,10 +1408,12 @@ full path of the scheduler.</p></div>
    tasksPerWorker=12
    initialScore=10000
    filesystem=local
-   jobproject=pi-wilde
-   workdir=/scratch/midway/sophiayang/work
+   jobproject=pi-wilde    # Put your own project ID here
+   workdir=/scratch/midway/$USER/work
 }</code></pre>
 </div></div>
+<div class="paragraph"><p>Note that if you have a different <code>$USER</code> name on your working site from your
+local machine, you should change the  <code>workdir</code> accordingly to the correct one.</p></div>
 <div class="paragraph"><p>With the right specifications, you can define your own site using similar
 property settings. Swift will then be able to run anywhere you want.</p></div>
 <div class="paragraph"><p>More explanations on setting the configuration file will be found in the User Guide.</p></div>
@@ -1423,15 +1425,16 @@ property settings. Swift will then be able to run anywhere you want.</p></div>
 <td class="content">
 <div class="paragraph"><p>Make sure you have passphraseless accesses to all sites
 to ensure a smooth workflow. This can be done by identifying yourself with
-your public key on all remote sites.</p></div>
+your public key on all remote sites. Here is a tutorial for doing this:
+<a href="http://www.unixwiz.net/techtips/ssh-agent-forwarding.html">http://www.unixwiz.net/techtips/ssh-agent-forwarding.html</a></p></div>
 </td>
 </tr></table>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_example_5_controlling_the_compute_node_pools_where_applications_run">Example 5: Controlling the compute-node pools where applications run</h3>
-<div class="paragraph"><p><code>p5.swift</code> is exactly the same as <code>p4.swift</code> with one exception: <code>stats.sh</code> is executed
-using <code>sh</code> instead of <code>bash</code> in the <code>analyze</code> application.</p></div>
+<div class="paragraph"><p><code>p5.swift</code> is exactly the same as <code>p4.swift</code> with one exception: <code>simulate.sh</code> and <code>stats.sh</code>
+are executed using <code>remote_sh</code> and <code>local_sh</code> respectively instead of <code>bash</code>.</p></div>
 <div class="listingblock">
 <div class="title">p5.swift</div>
 <div class="content">
@@ -1439,12 +1442,12 @@ using <code>sh</code> instead of <code>bash</code> in the <code>analyze</code> a
 
 app (file out, file log) simulation (int sim_steps, int sim_range, int sim_values, file sim_script)
 {
-  bash "simulate.sh" "--timesteps" sim_steps "--range" sim_range "--nvalues" sim_values stdout=@out stderr=@log;
+  remote_sh "simulate.sh" "--timesteps" sim_steps "--range" sim_range "--nvalues" sim_values stdout=filename(out) stderr=filename(log);
 }
 
 app (file out, file log) analyze (file s[], file stat_script)
 {
-  sh "stats.sh" filenames(s) stdout=filename(out) stderr=filename(log);
+  local_sh "stats.sh" filenames(s) stdout=filename(out) stderr=filename(log);
 }
 
 int nsim   = toInt(arg("nsim",   "10"));
@@ -1467,44 +1470,32 @@ file stats_out&lt;"output/average.out"&gt;;
 file stats_log&lt;"output/average.log"&gt;;
 (stats_out, stats_log) = analyze(sims,stats_script);</code></pre>
 </div></div>
-<div class="paragraph"><p>This modification can be used to control where you run your applications. Right now Swift will
-execute each of the <code>apps</code> on every site where it is able to be located in <code>$PATH</code>. Therefore,
-in order to give instructions on where to run each application, you need to define <strong>each</strong> of the <code>apps</code>
-you used inside your application declarations in <code>swift.properties</code>. For example in this case:</p></div>
+<div class="paragraph"><p>This modification can be used to control where you run your applications. In order to do this,
+you need to define <strong>each</strong> of the <code>apps</code> you used inside your application declarations to specify
+where they come from. They should be put in the <code>swift.properties</code> in the following form:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>app.&lt;site&gt;.&lt;app_name&gt;=&lt;path_to_executable&gt;</code></pre>
+</div></div>
+<div class="paragraph"><p>By setting an "app location" property in the <code>swift.properties</code>, you are explicitly setting the
+sites on which the <code>app</code> is allowed to run and the executable to be used on that site. A point
+to note is that, if there is no <code>app</code> defined in the <code>swift.properties</code>, Swift will assume that
+every <code>app</code> in the Swift script is free to run on all defined sites. But if any single <code>app</code>
+is defined in the <code>swift.properties</code>, Swift expects to see <code>app</code> property for every <code>app</code> used.
+For example:</p></div>
 <div class="listingblock">
 <div class="title">Definition for app <code>simulation</code></div>
 <div class="content">
-<pre><code>app.midway.bash=/bin/bash</code></pre>
+<pre><code>app.midway.remote_sh=/bin/bash</code></pre>
 </div></div>
-<div class="paragraph"><p>It indicates that the app <code>bash</code> is located in <code>/bin/bash</code> and Swift
-will look for such a file on a site named <code>midway</code> to run the <code>simulation</code> application.</p></div>
+<div class="paragraph"><p>It indicates that the app <code>remote_sh</code> should be executed using <code>/bin/bash</code> and Swift
+will look for it on a site named <code>midway</code> to run the <code>simulation</code> application.</p></div>
 <div class="listingblock">
 <div class="title">Definition for app <code>analyze</code></div>
 <div class="content">
-<pre><code>app.local.analyze=/bin/sh</code></pre>
+<pre><code>app.local.local_sh=/bin/bash</code></pre>
 </div></div>
 <div class="paragraph"><p>Similarly, Swift will look for <code>/bin/sh</code> locally to execute the <code>analyze</code> application.</p></div>
-<div class="paragraph"><p>For another example, let us take another look at <code>p1.swift</code>:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>type file;
-
-app (file o) simulation ()
-{
-  simulate stdout=filename(o);
-}
-
-file f &lt;"sim.out"&gt;;
-f = simulation();</code></pre>
-</div></div>
-<div class="paragraph"><p>If you define app <code>simulate</code> like this:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>app.local.simulate=$PWD/simulate.sh</code></pre>
-</div></div>
-<div class="paragraph"><p>It indicates that the app <code>simulate</code> is located in the file <code>simulate.sh</code> and since
-the path <code>simulate.sh</code> is specified with no directory components, Swift expects that
-<code>simulate.sh</code> executable will be available in your <code>$PATH</code>.</p></div>
 <div class="paragraph"><div class="title">Specifying sites in configuration file</div><p>If you are used to running jobs on a fixed combination of sites and don&#8217;t want to type
 out the names every single time, you can also specify them in <code>swift.properties</code>
 by doing <code>site=XX, XX, ...</code> For example, instead of running:</p></div>
@@ -1758,7 +1749,7 @@ $ plot.sh run000.log</code></pre>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-07-03 10:16:08 CDT
+Last updated 2014-07-08 15:09:29 CDT
 </div>
 </div>
 </body>
