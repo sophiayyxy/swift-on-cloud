@@ -23,9 +23,9 @@ for complex parallel programming.  Swift expresses your workflow in a
 portable fashion: The same script runs on multicore computers,
 clusters, clouds, grids, and supercomputers. 
 
-This tutorial contains *two parts*. In the first part you will be able to try a few
+This tutorial contains *two sections*. In the first section you will be able to try a few
 Swift examples on your local machine, to get a sense of the language. Then in the 
-second part you will run similar workflows on remote resources such as Midway, 
+second section you will run similar workflows on remote resources such as Midway, 
 distributed OSG Connect resources, Cray, etc., and learn how to instruct Swift to run 
 jobs in different places. You will also see how more 
 complex workflows can be expressed with Swift scripts.
@@ -37,16 +37,18 @@ on your own machine by connecting to them remotely.
 
 Swift installation
 ------------------
-1. Download the file by running "wget http://swiftlang.org/packages/swift-0.95-RC6.tar.gz"
-2. Extract by running "tar xfz swift-0.95-RC6.tar.gz"
-3. Add to PATH by running "export PATH=/path/to/swift-0.95-RC6/bin:$PATH"
+-----
+$ wget http://swiftlang.org/packages/swift-0.95-RC6.tar.gz  # Download the file
+$ tar xfz swift-0.95-RC6.tar.gz   # Extract the file
+$ export PATH=/path/to/swift-0.95-RC6/bin:$PATH   # Add to PATH
+-----
 
 Tutorial scripts installation
 -----------------------------
 Run the following commands to extract these tutorial scripts. [red]#<fix?>#
 
 -----
-wget https://github.com/tauzi/swift-on-cloud/archive/master.zip
+wget https://github.com/yadudoc/swift-on-cloud/archive/master.zip
 unzip master.zip
 mv swift-on-cloud-master swift-on-cloud
 cd swift-on-cloud/swift-cloud-tutorial
@@ -69,7 +71,7 @@ In the tutorial directory you will find six `partNN` folders. Each part contains
 demonstrate different functions for the workflow tutorial. `part01` to `part03` contain 
 Swift scripts for running jobs locally. `part04` to `part06` contain scripts for running jobs on remote 
 resources that you have access to, with corresponding configurations. Further explanations on these will 
-be in Part Two of this tutorial.
+be in Section Two of this tutorial.
 
 .To check out the tutorial scripts from SVN
 
@@ -89,6 +91,12 @@ To verify that Swift has successfully loaded, run:
 -----
 $ swift -version # verify that you have Swift 0.95 RC6
 -----
+
+[NOTE]
+=====
+If you re-login or open new ssh sessions, you must re-run `source setup.sh` in each 
+ssh shell/window.
+=====
 
 Simple sample "science applications" for the workflow tutorial
 --------------------------------------------------------------
@@ -199,9 +207,9 @@ $ stats.sh f* 2>log
 -----
 
 
-*Tutorial Part One*
--------------------
-This tutorial is only for running on localhost. See Part Two for tutorial on running jobs on 
+*Tutorial Section One*
+----------------------
+This tutorial is only for running on localhost. See Section Two for tutorial on running jobs on 
 remote resources.
 
 /////
@@ -315,7 +323,7 @@ You will find a Swift configuration file `swift.properties`
 in each `partNN` directory in the tutorial folder. It defines properties 
 that control the parallelism involved in the swift execution. It also defines 
 properties such as the work directory and the scheduler to use. The specifics will 
-be explained in more detail in the second part of the tutorial, and can be 
+be explained in more detail in the second section of the tutorial, and can be 
 ignored for now. 
 =====
 
@@ -405,7 +413,7 @@ int values = toInt(arg("values","5"));
 Now we can specify that more runs should be performed and that each should 
 run for more timesteps, and produce more that one value each, within a specified 
 range, using command line arguments placed after the Swift script name in the 
-form `-parameterName = value`:
+form `-parameterName=value`:
 
 -----
 $ swift p3.swift -nsim=3 -steps=10 -values=4 -range=1000000
@@ -487,8 +495,8 @@ Now that we've seen how to use Swift to complete simple jobs for you
 on your local machine, we can now proceed to learning how to run 
 similar workflows on remote machines.
 
-*Tutorial Part Two*
--------------------
+*Tutorial Section Two*
+----------------------
 
 When you have access to other resources that you wish to run jobs on, 
 you can simply state `-site=XX` (where `XX` is the name of the resource) on the command line 
@@ -496,14 +504,14 @@ following the usual command given to run Swift. With the right configuration
 specifications, Swift will automatically connect you to the target machine and 
 start the jobs there. 
 
-For example, if you are already logged in to a certain machine and you wish to run 
+For example, if you are already logged in on a certain machine and you wish to run 
 jobs locally, you can do:
 -----
 $ swift p1.swift -site=local
 -----
 Then Swift will complete the jobs for you on the login node.
 
-You can use `part01-03` to run the same workflows as in Part One on the local 
+You can use `part01-03` to run the same workflows as in Section One on the local 
 node as an exercise. You will learn more examples for running on remote sites using 
 `part04-06` introduced in the following section.
 
@@ -600,7 +608,7 @@ and we have to manually give the command to execute the bash script.
 In order to run `p4.swift` on compute nodes instead of on the headnode, you can again specify it on the command 
 line. For example, if you are on Midway, you can run:
 -----
-$ swift p4.swift -site=midway-compute
+$ swift p4.swift -site=midway
 -----
 
 The site names can be defined in the Swift's `swift.properties` configuration file. The 
@@ -610,14 +618,14 @@ Consider, for example, that Midway has several Slurm partitions. The sandyb part
 cores, and the westmere partition has 12 cores. Depending on the application and which partitions 
 are busy, you may want to modify where you run in the `jobQueue` specification:
 -----
-site.midway-compute {
+site.midway {
    jobManager=slurm
    jobQueue=westmere
    tasksPerWorker=4
    initialScore=10000
    filesystem=local
-   jobproject=pi-wilde
-   workdir=/scratch/midway/sophiayang/work
+   jobproject=pi-wilde    # Put your own project ID here
+   workdir=/scratch/midway/$USER/work
 }
 -----
 By setting the `tasksPerWorker` to the desired number of parallel application 
@@ -644,10 +652,13 @@ site.midway-remote {
    tasksPerWorker=12
    initialScore=10000
    filesystem=local
-   jobproject=pi-wilde
-   workdir=/scratch/midway/sophiayang/work
+   jobproject=pi-wilde    # Put your own project ID here
+   workdir=/scratch/midway/$USER/work
 }
 -----
+
+Note that if you have a different `$USER` name on your working site from your 
+local machine, you should change the  `workdir` accordingly to the correct one.
 
 With the right specifications, you can define your own site using similar 
 property settings. Swift will then be able to run anywhere you want.
@@ -658,13 +669,14 @@ More explanations on setting the configuration file will be found in the User Gu
 =====
 Make sure you have passphraseless accesses to all sites 
 to ensure a smooth workflow. This can be done by identifying yourself with 
-your public key on all remote sites.
+your public key on all remote sites. Here is a tutorial for doing this: 
+http://www.unixwiz.net/techtips/ssh-agent-forwarding.html
 =====
 
 Example 5: Controlling the compute-node pools where applications run
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-`p5.swift` is exactly the same as `p4.swift` with one exception: `stats.sh` is executed 
-using `sh` instead of `bash` in the `analyze` application.
+`p5.swift` is exactly the same as `p4.swift` with one exception: `simulate.sh` and `stats.sh` 
+are executed using `remote_sh` and `local_sh` respectively instead of `bash`.
 
 .p5.swift
 -----
@@ -672,12 +684,12 @@ type file;
 
 app (file out, file log) simulation (int sim_steps, int sim_range, int sim_values, file sim_script)
 {
-  bash "simulate.sh" "--timesteps" sim_steps "--range" sim_range "--nvalues" sim_values stdout=@out stderr=@log;
+  remote_sh "simulate.sh" "--timesteps" sim_steps "--range" sim_range "--nvalues" sim_values stdout=filename(out) stderr=filename(log);
 }
 
 app (file out, file log) analyze (file s[], file stat_script)
 {
-  sh "stats.sh" filenames(s) stdout=filename(out) stderr=filename(log);
+  local_sh "stats.sh" filenames(s) stdout=filename(out) stderr=filename(log);
 }
 
 int nsim   = toInt(arg("nsim",   "10"));
@@ -701,25 +713,39 @@ file stats_log<"output/average.log">;
 (stats_out, stats_log) = analyze(sims,stats_script);
 -----
 
-This modification can be used to control where you run your applications. Right now Swift will 
-execute each of the `apps` on every site where it is able to be located in `$PATH`. Therefore, 
-in order to give instructions on where to run each application, you need to define *each* of the `apps` 
-you used inside your application declarations in `swift.properties`. For example in this case:
+This modification can be used to control where you run your applications. In order to do this, 
+you need to define *each* of the `apps` you used inside your application declarations to specify 
+where they come from. They should be put in the `swift.properties` in the following form:
+-----
+app.<site>.<app_name>=<path_to_executable>
+-----
+By setting an "app location" property in the `swift.properties`, you are explicitly setting the 
+sites on which the `app` is allowed to run and the executable to be used on that site. A point 
+to note is that, if there is no `app` defined in the `swift.properties`, Swift will assume that 
+every `app` in the Swift script is free to run on all defined sites. But if any single `app` 
+is defined in the `swift.properties`, Swift expects to see `app` property for every `app` used. 
+For example:
+
+////
+Right now Swift will 
+execute each of the `apps` on every site where it is able to be located in `$PATH`. 
+Therefore, 
+////
 
 .Definition for app `simulation`
 -----
-app.midway.bash=/bin/bash
+app.midway.remote_sh=/bin/bash
 -----
-It indicates that the app `bash` is located in `/bin/bash` and Swift 
-will look for such a file on a site named `midway` to run the `simulation` application.
+It indicates that the app `remote_sh` should be executed using `/bin/bash` and Swift 
+will look for it on a site named `midway` to run the `simulation` application.
 
 .Definition for app `analyze`
 -----
-app.local.analyze=/bin/sh
+app.local.local_sh=/bin/bash
 -----
 Similarly, Swift will look for `/bin/sh` locally to execute the `analyze` application.
 
-
+////
 For another example, let us take another look at `p1.swift`:
 -----
 type file;
@@ -740,6 +766,7 @@ app.local.simulate=$PWD/simulate.sh
 It indicates that the app `simulate` is located in the file `simulate.sh` and since 
 the path `simulate.sh` is specified with no directory components, Swift expects that 
 `simulate.sh` executable will be available in your `$PATH`.
+////
 
 .Specifying sites in configuration file
 If you are used to running jobs on a fixed combination of sites and don't want to type 
@@ -981,18 +1008,3 @@ This can thus yield plots like the following:
 
 image::activeplot.png[width=700,align=center]
 image::cumulativeplot.png[width=700,align=center]
-
-
-////
-You will also find a Swift configuration file `swift.properties` 
-in each `partNN` directory in the tutorial folder. These specify the 
-environment-specific details of where to find application (file `apps`) 
-and where to run them (file `sites.xml`). These files will be explained 
-in more detail in the second part, and can be ignored for now.
-
-In part 2, we update the `swift.properties` file. Instead of using 
-shell script `simulate.sh`, we use the equivalent python version 
-`simulate.py`. Swift does not need to know anything about the language an 
-application is written in. The application can be written in Perl, Python, 
-Java, Fortran, or any other language. (see def in localhost tutorial part2)
-////
