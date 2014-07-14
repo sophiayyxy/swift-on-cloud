@@ -279,7 +279,7 @@ get started!
 Example 1: Run a single application under Swift
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The first swift script, `p1.swift`, runs `simulate.sh` to generate a
+The first Swift script, `p1.swift`, runs `simulate.sh` to generate a
 single random number. It writes the number to a file.
 
 image::part01.png["p1 workflow",align="center"]
@@ -525,14 +525,47 @@ automatically carried over.
 Example 4: Running a simple app on remote node
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+In `p4.swift`, there is a simple `app` which takes a file containing random numbers and `sort` them before returning a sorted output. In the `part04` 
+folder  we have a file, `unsorted.txt`, which contains 100 random integers ranging from 0 to 99 and we wish to run the job on a remote node.
 
+.p4.swift
+-----
+type file;
 
+app (file out) sortdata (file unsorted)
+{
+  sort "--n" "unsorted.txt" stdout=filename(out);
+}
 
+file unsorted <"unsorted.txt">;
+file sorted <"sorted.txt">;
 
+sorted = sortdata(unsorted);
+-----
 
+Since `sort` has most likely already been implemented on the remote node, all we need to do is send the `unsorted.txt` to the node and specify the 
+location where you want to run the job on the command line, using `-site=XX`. After the job completes we will get a 
+sorted file  `sorted.txt` back to the local machine.
 
-
-
+For example, to run the job remotely on Midway and to view the output:
+-----
+$ cd ../part04
+$ swift p4.swift -site=midway-remote
+Swift 0.95 RC6 swift-r7900 cog-r3908
+RunID: run001
+Progress: Mon, 14 Jul 2014 16:29:42-0500
+Progress: Mon, 14 Jul 2014 16:29:43-0500  Submitting:1
+Progress: Mon, 14 Jul 2014 16:29:55-0500  Submitted:1
+Final status:Mon, 14 Jul 2014 16:29:56-0500  Finished successfully:1
+$ cat sorted.txt
+0
+1
+2
+3
+...
+...
+99
+-----
 
 Example 4: Running a parallel ensemble on compute nodes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

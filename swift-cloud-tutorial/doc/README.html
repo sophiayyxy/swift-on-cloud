@@ -1023,7 +1023,7 @@ get started!</p></div>
 </div>
 <div class="sect2">
 <h3 id="_example_1_run_a_single_application_under_swift">Example 1: Run a single application under Swift</h3>
-<div class="paragraph"><p>The first swift script, <code>p1.swift</code>, runs <code>simulate.sh</code> to generate a
+<div class="paragraph"><p>The first Swift script, <code>p1.swift</code>, runs <code>simulate.sh</code> to generate a
 single random number. It writes the number to a file.</p></div>
 <div class="imageblock" style="text-align:center;">
 <div class="content">
@@ -1314,6 +1314,48 @@ instructions. However, you do not need to do the same for the remote sites as Sw
 automatically carried over.</p></div>
 </td>
 </tr></table>
+</div>
+<div class="sect2">
+<h3 id="_example_4_running_a_simple_app_on_remote_node">Example 4: Running a simple app on remote node</h3>
+<div class="paragraph"><p>In <code>p4.swift</code>, there is a simple <code>app</code> which takes a file containing random numbers and <code>sort</code> them before returning a sorted output. In the <code>part04</code>
+folder  we have a file, <code>unsorted.txt</code>, which contains 100 random integers ranging from 0 to 99 and we want to run the job on a remote node.</p></div>
+<div class="listingblock">
+<div class="title">p4.swift</div>
+<div class="content">
+<pre><code>type file;
+
+app (file out) sortdata (file unsorted)
+{
+  sort "--n" "unsorted.txt" stdout=filename(out);
+}
+
+file unsorted &lt;"unsorted.txt"&gt;;
+file sorted &lt;"sorted.txt"&gt;;
+
+sorted = sortdata(unsorted);</code></pre>
+</div></div>
+<div class="paragraph"><p>Since <code>sort</code> has most likely already been implemented on the remote node, all we need to do is send the <code>unsorted.txt</code> to the node and specify the
+location where you want to run the job on the command line using <code>-site=XX</code>. After the job completes we will get a
+sorted file  <code>sorted.txt</code> back to the local machine.</p></div>
+<div class="paragraph"><p>For example, to run the job remotely on Midway and to view the output:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ cd ../part04
+$ swift p4.swift -site=midway-remote
+Swift 0.95 RC6 swift-r7900 cog-r3908
+RunID: run001
+Progress: Mon, 14 Jul 2014 16:29:42-0500
+Progress: Mon, 14 Jul 2014 16:29:43-0500  Submitting:1
+Progress: Mon, 14 Jul 2014 16:29:55-0500  Submitted:1
+Final status:Mon, 14 Jul 2014 16:29:56-0500  Finished successfully:1
+$ cat sorted.txt
+0
+1
+2
+...
+...
+99</code></pre>
+</div></div>
 </div>
 <div class="sect2">
 <h3 id="_example_4_running_a_parallel_ensemble_on_compute_nodes">Example 4: Running a parallel ensemble on compute nodes</h3>
@@ -1749,7 +1791,7 @@ $ plot.sh run000.log</code></pre>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-07-08 15:09:29 CDT
+Last updated 2014-07-14 16:41:22 CDT
 </div>
 </div>
 </body>
