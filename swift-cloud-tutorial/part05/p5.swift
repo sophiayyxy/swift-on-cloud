@@ -7,7 +7,7 @@ app (file out, file log) simulation (int sim_steps, int sim_range, int sim_value
 
 app (file out, file log) analyze (file s[], file stat_script)
 {
-  sh "stats.sh" filenames(s) stdout=@out stderr=@log;
+  bash "stats.sh" filenames(s) stdout=@out stderr=@log;
 }
 
 int nsim   = toInt(arg("nsim",   "10"));
@@ -15,9 +15,10 @@ int steps  = toInt(arg("steps",  "1"));
 int range  = toInt(arg("range",  "100"));
 int values = toInt(arg("values", "5"));
 
-file sims[];
 file simulate_script <"simulate.sh">;
 file stats_script <"stats.sh">;
+
+file sims[];
 
 foreach i in [0:nsim-1] {
   file simout <single_file_mapper; file=strcat("output/sim_",i,".out")>;
@@ -28,4 +29,4 @@ foreach i in [0:nsim-1] {
 
 file stats_out<"output/average.out">;
 file stats_log<"output/average.log">;
-(stats_out, stats_log) = analyze(sims,stats_script);
+(stats_out, stats_log) = analyze(sims, stats_script);

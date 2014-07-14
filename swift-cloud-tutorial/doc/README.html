@@ -1318,7 +1318,7 @@ automatically carried over.</p></div>
 <div class="sect2">
 <h3 id="_example_4_running_a_simple_app_on_remote_node">Example 4: Running a simple app on remote node</h3>
 <div class="paragraph"><p>In <code>p4.swift</code>, there is a simple <code>app</code> which takes a file containing random numbers and <code>sort</code> them before returning a sorted output. In the <code>part04</code>
-folder  we have a file, <code>unsorted.txt</code>, which contains 100 random integers ranging from 0 to 99 and we want to run the job on a remote node.</p></div>
+folder  we have a file, <code>unsorted.txt</code>, which contains 100 random integers ranging from 0 to 99 and we wish to run the job on a remote node.</p></div>
 <div class="listingblock">
 <div class="title">p4.swift</div>
 <div class="content">
@@ -1335,7 +1335,7 @@ file sorted &lt;"sorted.txt"&gt;;
 sorted = sortdata(unsorted);</code></pre>
 </div></div>
 <div class="paragraph"><p>Since <code>sort</code> has most likely already been implemented on the remote node, all we need to do is send the <code>unsorted.txt</code> to the node and specify the
-location where you want to run the job on the command line using <code>-site=XX</code>. After the job completes we will get a
+location where you want to run the job on the command line, using <code>-site=XX</code>. After the job completes we will get a
 sorted file  <code>sorted.txt</code> back to the local machine.</p></div>
 <div class="paragraph"><p>For example, to run the job remotely on Midway and to view the output:</p></div>
 <div class="listingblock">
@@ -1352,18 +1352,19 @@ $ cat sorted.txt
 0
 1
 2
+3
 ...
 ...
 99</code></pre>
 </div></div>
 </div>
 <div class="sect2">
-<h3 id="_example_4_running_a_parallel_ensemble_on_compute_nodes">Example 4: Running a parallel ensemble on compute nodes</h3>
-<div class="paragraph"><p><code>p4.swift</code> will run our mock "simulation" applications on compute nodes. The script is almost the same
+<h3 id="_example_5_running_a_parallel_ensemble_on_compute_nodes">Example 5: Running a parallel ensemble on compute nodes</h3>
+<div class="paragraph"><p><code>p5.swift</code> will run our mock "simulation" applications on compute nodes. The script is almost the same
 as <code>p3.swift</code>, but specifies that each <code>simulation</code> app invocation should additionally return
 the log file which the application writes to <code>stderr</code>.</p></div>
 <div class="listingblock">
-<div class="title">p4.swift</div>
+<div class="title">p5.swift</div>
 <div class="content">
 <pre><code>type file;
 
@@ -1398,17 +1399,16 @@ file stats_out&lt;"output/average.out"&gt;;
 file stats_log&lt;"output/average.log"&gt;;
 (stats_out, stats_log) = analyze(sims, stats_script);</code></pre>
 </div></div>
-<div class="paragraph"><p>Now when you run <code>swift p4.swift</code> you will see that two types of output files will be placed in
+<div class="paragraph"><p>Note that since <code>simulate</code> and <code>stats</code> are no longer in the <code>$PATH</code> of the remote site, we need to pass both <code>simulate.sh</code> and <code>stats.sh</code> as
+arguments to the <code>app`s to send them there and use `bash</code> to invoke them to be able to use them.</p></div>
+<div class="paragraph"><p>Now when you run <code>swift p5.swift</code> you will see that two types of output files will be placed in
 the <code>output/</code> directory: <code>sim_N.out</code> and <code>sim_N.log</code>. The log files provide data on the runtime
 environment of each app invocation.</p></div>
-<div class="paragraph"><p>Note that in the script we use <code>bash</code> to invoke <code>simulate.sh</code> and <code>stats.sh</code> instead of just using <code>simulate</code> and
-<code>stats</code>. This is because <code>simulate</code> and <code>stats</code> are no longer added to the <code>$PATH</code> on the remote site
-and we have to manually give the command to execute the bash script.</p></div>
-<div class="paragraph"><p>In order to run <code>p4.swift</code> on compute nodes instead of on the headnode, you can again specify it on the command
-line. For example, if you are on Midway, you can run:</p></div>
+<div class="paragraph"><p>In order to run <code>p5.swift</code> on compute nodes instead of on the headnode, you can again specify it on the command
+line. For example, if you are on Midway, instead of running locally, you can run:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>$ swift p4.swift -site=midway</code></pre>
+<pre><code>$ swift p5.swift -site=midway</code></pre>
 </div></div>
 <div class="paragraph"><p>The site names can be defined in the Swift&#8217;s <code>swift.properties</code> configuration file. The
 file allows many parameters to specify how jobs should be run on a given site.</p></div>
@@ -1438,7 +1438,7 @@ full path of the scheduler.</p></div>
 <div class="paragraph"><p>For example, if you run:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>$ swift p4.swift -site=midway-remote</code></pre>
+<pre><code>$ swift p5.swift -site=midway-remote</code></pre>
 </div></div>
 <div class="paragraph"><p>Swift will <code>ssh</code> to the target site and start the jobs there.</p></div>
 <div class="paragraph"><p><code>swift.properties</code> will therefore look like this:</p></div>
@@ -1474,11 +1474,11 @@ your public key on all remote sites. Here is a tutorial for doing this:
 </div>
 </div>
 <div class="sect2">
-<h3 id="_example_5_controlling_the_compute_node_pools_where_applications_run">Example 5: Controlling the compute-node pools where applications run</h3>
-<div class="paragraph"><p><code>p5.swift</code> is exactly the same as <code>p4.swift</code> with one exception: <code>simulate.sh</code> and <code>stats.sh</code>
+<h3 id="_example_6_controlling_the_compute_node_pools_where_applications_run">Example 6: Controlling the compute-node pools where applications run</h3>
+<div class="paragraph"><p><code>p6.swift</code> is exactly the same as <code>p5.swift</code> with one exception: <code>simulate.sh</code> and <code>stats.sh</code>
 are executed using <code>remote_sh</code> and <code>local_sh</code> respectively instead of <code>bash</code>.</p></div>
 <div class="listingblock">
-<div class="title">p5.swift</div>
+<div class="title">p6.swift</div>
 <div class="content">
 <pre><code>type file;
 
@@ -1543,7 +1543,7 @@ out the names every single time, you can also specify them in <code>swift.proper
 by doing <code>site=XX, XX, ...</code> For example, instead of running:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>$ swift p5.swift -site=midway-remote,local</code></pre>
+<pre><code>$ swift p6.swift -site=midway-remote,local</code></pre>
 </div></div>
 <div class="paragraph"><p>You can just say this in <code>swift.properties</code>:</p></div>
 <div class="listingblock">
@@ -1555,8 +1555,8 @@ when you run <code>swift p5.swift</code> Swift will execute each of the <code>ap
 corresponding site that you specified.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_example_6_specifying_more_complex_workflow_patterns">Example 6: Specifying more complex workflow patterns</h3>
-<div class="paragraph"><p><code>p6.swift</code> expands the workflow pattern of <code>p5.swift</code> to add additional
+<h3 id="_example_7_specifying_more_complex_workflow_patterns">Example 7: Specifying more complex workflow patterns</h3>
+<div class="paragraph"><p><code>p7.swift</code> expands the workflow pattern of <code>p6.swift</code> to add additional
 stages to the workflow. Here, we generate a dynamic seed value that
 will be used by all of the simulations to initialize the random number
 generator, so that there are some dependencies to the numbers being generated.
@@ -1568,7 +1568,7 @@ file" (Remeber the form <code>(R*scale)+bias</code>). This pattern is shown belo
 </div>
 </div>
 <div class="listingblock">
-<div class="title">p6.swift</div>
+<div class="title">p7.swift</div>
 <div class="content">
 <pre><code>type file;
 
@@ -1639,13 +1639,13 @@ depends on the single seed value, calculated in this statement:</p></div>
 <div class="paragraph"><p>To run:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>$ cd ../part06
-$ swift p6.swift</code></pre>
+<pre><code>$ cd ../part07
+$ swift p7.swift</code></pre>
 </div></div>
 <div class="paragraph"><p>The default parameters result in the following execution log:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>$ swift p6.swift
+<pre><code>$ swift p7.swift
 Swift 0.95 Branch SVN swift-r7903 cog-r3908
 RunID: run001
 Progress: Thu, 05 Jun 2014 06:01:36-0500
@@ -1743,55 +1743,13 @@ bias values as is needed for each simulation.  As a further exercise,
 modify the script to generate a unique seed value for each simulation,
 which is a common practice in ensemble computations.</p></div>
 </div>
-<div class="sect2">
-<h3 id="_performing_larger_swift_runs_and_plotting_run_activities">Performing larger Swift runs and Plotting run activities</h3>
-<div class="paragraph"><p>To test with larger runs, you can change the command line arguments. The
-example below will run 1000 simulations with each simulation taking 5 seconds:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>$ swift p6.swift -steps=5 -nsim=1000</code></pre>
-</div></div>
-<div class="paragraph"><p>The tutorial <code>bin</code> directory in your <code>$PATH</code> provides a script
-<code>plot.sh</code> to plot the progress of a Swift script.  It generates two
-image files: <code>activeplot.png</code>, which shows the number of active jobs
-over time, and <code>cumulativeplot.png</code>, which shows the total number of
-app calls completed as the Swift script progresses.</p></div>
-<div class="paragraph"><p>After each Swift run, a new run directory is created called <code>runNNN</code>.
-Each run directory will have a log file with a similar name called
-<code>runNNN.log</code>. Once you have identified the log file name, run the
-command <code>plot.sh &lt;logfile&gt;</code> to generate the plots for that
-specific run. For example:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>$ ls
-output  p3.swift  run000  swift.properties
-
-$ cd run000/
-
-$ ls
-apps  cf  p3-20131202-2004-0kh4ha6e.d  run000.log  sites.xml
-
-$ plot.sh run000.log</code></pre>
-</div></div>
-<div class="paragraph"><p>This can thus yield plots like the following:</p></div>
-<div class="imageblock">
-<div class="content">
-<img src="activeplot.png" alt="width=700" />
-</div>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="cumulativeplot.png" alt="width=700" />
-</div>
-</div>
-</div>
 </div>
 </div>
 </div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-07-14 16:41:22 CDT
+Last updated 2014-07-14 17:12:37 CDT
 </div>
 </div>
 </body>

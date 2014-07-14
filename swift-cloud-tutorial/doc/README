@@ -567,14 +567,14 @@ $ cat sorted.txt
 99
 -----
 
-Example 4: Running a parallel ensemble on compute nodes
+Example 5: Running a parallel ensemble on compute nodes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`p4.swift` will run our mock "simulation" applications on compute nodes. The script is almost the same 
+`p5.swift` will run our mock "simulation" applications on compute nodes. The script is almost the same 
 as `p3.swift`, but specifies that each `simulation` app invocation should additionally return 
-the log file which the application writes to `stderr`.
+the log file which the application writes to `stderr`. 
 
-.p4.swift
+.p5.swift
 -----
 type file;
 
@@ -610,7 +610,10 @@ file stats_log<"output/average.log">;
 (stats_out, stats_log) = analyze(sims, stats_script);
 -----
 
-Now when you run `swift p4.swift` you will see that two types of output files will be placed in 
+Note that since `simulate` and `stats` are no longer in the `$PATH` of the remote site, we need to pass both `simulate.sh` and `stats.sh` as 
+arguments to the `app`s to send them there and use `bash` to invoke them to be able to use them.
+
+Now when you run `swift p5.swift` you will see that two types of output files will be placed in 
 the `output/` directory: `sim_N.out` and `sim_N.log`. The log files provide data on the runtime 
 environment of each app invocation. 
 ////
@@ -646,14 +649,10 @@ ANT_HOME_modshare=/software/ant-1.8.4-all:3
 -----
 ////
 
-Note that in the script we use `bash` to invoke `simulate.sh` and `stats.sh` instead of just using `simulate` and 
-`stats`. This is because `simulate` and `stats` are no longer added to the `$PATH` on the remote site 
-and we have to manually give the command to execute the bash script.
-
-In order to run `p4.swift` on compute nodes instead of on the headnode, you can again specify it on the command 
-line. For example, if you are on Midway, you can run:
+In order to run `p5.swift` on compute nodes instead of on the headnode, you can again specify it on the command 
+line. For example, if you are on Midway, instead of running locally, you can run:
 -----
-$ swift p4.swift -site=midway
+$ swift p5.swift -site=midway
 -----
 
 The site names can be defined in the Swift's `swift.properties` configuration file. The 
@@ -685,7 +684,7 @@ full path of the scheduler.
 
 For example, if you run:
 -----
-$ swift p4.swift -site=midway-remote
+$ swift p5.swift -site=midway-remote
 -----
 Swift will `ssh` to the target site and start the jobs there.
 
@@ -718,12 +717,12 @@ your public key on all remote sites. Here is a tutorial for doing this:
 http://www.unixwiz.net/techtips/ssh-agent-forwarding.html
 =====
 
-Example 5: Controlling the compute-node pools where applications run
+Example 6: Controlling the compute-node pools where applications run
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-`p5.swift` is exactly the same as `p4.swift` with one exception: `simulate.sh` and `stats.sh` 
+`p6.swift` is exactly the same as `p5.swift` with one exception: `simulate.sh` and `stats.sh` 
 are executed using `remote_sh` and `local_sh` respectively instead of `bash`.
 
-.p5.swift
+.p6.swift
 -----
 type file;
 
@@ -818,7 +817,7 @@ If you are used to running jobs on a fixed combination of sites and don't want t
 out the names every single time, you can also specify them in `swift.properties` 
 by doing `site=XX, XX, ...` For example, instead of running:
 -----
-$ swift p5.swift -site=midway-remote,local
+$ swift p6.swift -site=midway-remote,local
 -----
 You can just say this in `swift.properties`:
 -----
@@ -828,10 +827,10 @@ Then if you have defined *all* your `apps` in the configuration file correctly,
 when you run `swift p5.swift` Swift will execute each of the `apps` on the 
 corresponding site that you specified.
 
-Example 6: Specifying more complex workflow patterns
+Example 7: Specifying more complex workflow patterns
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`p6.swift` expands the workflow pattern of `p5.swift` to add additional
+`p7.swift` expands the workflow pattern of `p6.swift` to add additional
 stages to the workflow. Here, we generate a dynamic seed value that
 will be used by all of the simulations to initialize the random number 
 generator, so that there are some dependencies to the numbers being generated. 
@@ -840,7 +839,7 @@ file" (Remeber the form `(R*scale)+bias`). This pattern is shown below, followed
 
 image::part06.png[align="center"]
 
-.p6.swift
+.p7.swift
 ----
 type file;
 
@@ -910,14 +909,14 @@ The bias file is computed and then consumed in these two dependent statements:
 
 To run:
 ----
-$ cd ../part06
-$ swift p6.swift
+$ cd ../part07
+$ swift p7.swift
 ----
 
 The default parameters result in the following execution log:
 
 -----
-$ swift p6.swift 
+$ swift p7.swift 
 Swift 0.95 Branch SVN swift-r7903 cog-r3908
 RunID: run001
 Progress: Thu, 05 Jun 2014 06:01:36-0500
@@ -1017,12 +1016,15 @@ bias values as is needed for each simulation.  As a further exercise,
 modify the script to generate a unique seed value for each simulation,
 which is a common practice in ensemble computations.
 
+////
+Below is commented out for further use.
+
 Performing larger Swift runs and Plotting run activities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To test with larger runs, you can change the command line arguments. The 
 example below will run 1000 simulations with each simulation taking 5 seconds:
 -----
-$ swift p6.swift -steps=5 -nsim=1000
+$ swift p7.swift -steps=5 -nsim=1000
 -----
 
 The tutorial `bin` directory in your `$PATH` provides a script
@@ -1053,3 +1055,6 @@ This can thus yield plots like the following:
 
 image::activeplot.png[width=700,align=center]
 image::cumulativeplot.png[width=700,align=center]
+
+Above is commented out for further use.
+////
