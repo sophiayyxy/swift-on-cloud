@@ -534,7 +534,7 @@ type file;
 
 app (file out) sortdata (file unsorted)
 {
-  sort "--n" "unsorted.txt" stdout=filename(out);
+  sort "-n" "unsorted.txt" stdout=filename(out);
 }
 
 file unsorted <"unsorted.txt">;
