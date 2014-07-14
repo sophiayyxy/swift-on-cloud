@@ -522,6 +522,18 @@ instructions. However, you do not need to do the same for the remote sites as Sw
 automatically carried over.
 =====
 
+Example 4: Running a simple app on remote node
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+
+
+
+
+
+
 Example 4: Running a parallel ensemble on compute nodes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
